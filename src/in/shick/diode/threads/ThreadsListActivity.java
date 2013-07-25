@@ -21,6 +21,7 @@ package in.shick.diode.threads;
 
 import in.shick.diode.R;
 import in.shick.diode.comments.CommentsListActivity;
+import in.shick.diode.comments.SavedCommentsActivity;
 import in.shick.diode.common.CacheInfo;
 import in.shick.diode.common.Common;
 import in.shick.diode.common.Constants;
@@ -1161,6 +1162,7 @@ public final class ThreadsListActivity extends ListActivity {
 	        menu.findItem(R.id.logout_menu_id).setTitle(
 	        		String.format(getResources().getString(R.string.logout), mSettings.getUsername())
     		);
+	        menu.findItem(R.id.saved_comments_menu_id).setVisible(true);
     	}
     	else {
 			menu.findItem(R.id.login_menu_id).setVisible(true);
@@ -1171,6 +1173,7 @@ public final class ThreadsListActivity extends ListActivity {
             menu.findItem(R.id.inbox_menu_id).setVisible(false);
             menu.findItem(R.id.user_profile_menu_id).setVisible(false);
             menu.findItem(R.id.logout_menu_id).setVisible(false);
+            menu.findItem(R.id.saved_comments_menu_id).setVisible(false);
     	}
     	
     	// Theme: Light/Dark
@@ -1283,7 +1286,11 @@ public final class ThreadsListActivity extends ListActivity {
     	case R.id.search:
         	startActivityForResult(new Intent(this, RedditSearchActivity.class), Constants.ACTIVITY_SEARCH_REDDIT);
     		break;
-    		
+    	case R.id.saved_comments_menu_id:
+    	    Intent toSC = new Intent(getApplicationContext(), SavedCommentsActivity.class);
+            startActivity(toSC);
+    	    //Toast.makeText(ThreadsListActivity.this, "This is a test", Toast.LENGTH_LONG).show();
+            break;
     	default:
     		throw new IllegalArgumentException("Unexpected action value "+item.getItemId());
     	}

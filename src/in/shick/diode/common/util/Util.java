@@ -378,6 +378,24 @@ public class Util {
 	// ===============
 	//       Uri
 	// ===============
+	static Uri createCommentUriNoContext(String linkId, String commentId)
+	{
+	    return Uri.parse(new StringBuilder(Constants.REDDIT_BASE_URL + "/comments/")
+	            .append(linkId)
+	            .append("/z/")
+	            .append(commentId)
+	            .toString());
+	}
+	
+	public static Uri createCommentUriNoContext(ThingInfo commentThingInfo)
+	{
+	    if (commentThingInfo.getLink_id() != null)
+	    {
+	        return createCommentUriNoContext(nameToId(commentThingInfo.getLink_id()), commentThingInfo.getId());
+	    }
+	    return null;
+	}
+	
 	
 	static Uri createCommentUri(String linkId, String commentId, int commentContext) {
 		return Uri.parse(new StringBuilder(Constants.REDDIT_BASE_URL + "/comments/")

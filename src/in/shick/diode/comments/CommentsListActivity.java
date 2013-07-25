@@ -20,6 +20,47 @@
 package in.shick.diode.comments;
 
 
+import in.shick.diode.R;
+import in.shick.diode.common.CacheInfo;
+import in.shick.diode.common.Common;
+import in.shick.diode.common.Constants;
+import in.shick.diode.common.RedditIsFunHttpClientFactory;
+import in.shick.diode.common.tasks.HideTask;
+import in.shick.diode.common.tasks.SaveTask;
+import in.shick.diode.common.util.CollectionUtils;
+import in.shick.diode.common.util.StringUtils;
+import in.shick.diode.common.util.Util;
+import in.shick.diode.login.LoginDialog;
+import in.shick.diode.login.LoginTask;
+import in.shick.diode.mail.InboxActivity;
+import in.shick.diode.mail.PeekEnvelopeTask;
+import in.shick.diode.markdown.MarkdownURL;
+import in.shick.diode.saved.SavedContent;
+import in.shick.diode.saved.SavedDBHandler;
+import in.shick.diode.settings.RedditPreferencesPage;
+import in.shick.diode.settings.RedditSettings;
+import in.shick.diode.things.ThingInfo;
+import in.shick.diode.threads.ThreadsListActivity;
+import in.shick.diode.threads.ThumbnailOnClickListenerFactory;
+import in.shick.diode.user.ProfileActivity;
+
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.params.HttpParams;
+import org.apache.http.protocol.HTTP;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -63,45 +104,6 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.params.HttpConnectionParams;
-import org.apache.http.params.HttpParams;
-import org.apache.http.protocol.HTTP;
-
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import in.shick.diode.R;
-import in.shick.diode.common.CacheInfo;
-import in.shick.diode.common.Common;
-import in.shick.diode.common.Constants;
-import in.shick.diode.common.RedditIsFunHttpClientFactory;
-import in.shick.diode.common.tasks.HideTask;
-import in.shick.diode.common.tasks.SaveTask;
-import in.shick.diode.common.util.CollectionUtils;
-import in.shick.diode.common.util.StringUtils;
-import in.shick.diode.common.util.Util;
-import in.shick.diode.login.LoginDialog;
-import in.shick.diode.login.LoginTask;
-import in.shick.diode.mail.InboxActivity;
-import in.shick.diode.mail.PeekEnvelopeTask;
-import in.shick.diode.markdown.MarkdownURL;
-import in.shick.diode.settings.RedditPreferencesPage;
-import in.shick.diode.settings.RedditSettings;
-import in.shick.diode.things.ThingInfo;
-import in.shick.diode.threads.ThreadsListActivity;
-import in.shick.diode.threads.ThumbnailOnClickListenerFactory;
-import in.shick.diode.user.ProfileActivity;
 
 
 /**
@@ -151,6 +153,9 @@ public class CommentsListActivity extends ListActivity
     
     private boolean mCanChord = false;
     
+    private SavedDBHandler sdb = null;
+    private boolean canSaveComment = true;
+    
     // override transition animation available Android 2.0 (SDK Level 5) and above
     private static Method mActivity_overridePendingTransition;
     
@@ -179,6 +184,8 @@ public class CommentsListActivity extends ListActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        sdb = new SavedDBHandler(this);
+        
 		CookieSyncManager.createInstance(getApplicationContext());
 		
 		mSettings.loadRedditPreferences(this, mClient);
@@ -243,7 +250,7 @@ public class CommentsListActivity extends ListActivity
         		finish();
         		return;
             }
-            
+                   
         	if (commentPath != null) {
         		if (Constants.LOGGING) Log.d(TAG, "comment path: "+commentPath);
         		
@@ -592,7 +599,9 @@ public class CommentsListActivity extends ListActivity
         			.execute(Constants.DEFAULT_COMMENT_DOWNLOAD_LIMIT);
         } else {
         	if (!"[deleted]".equals(item.getAuthor()))
-        		showDialog(Constants.DIALOG_COMMENT_CLICK);
+        	{
+        	    showDialog(Constants.DIALOG_COMMENT_CLICK);
+        	}
         }
     }
     
@@ -1247,11 +1256,13 @@ public class CommentsListActivity extends ListActivity
 	        menu.findItem(R.id.logout_menu_id).setTitle(
 	        		String.format(getResources().getString(R.string.logout), mSettings.getUsername())
     		);
+	        menu.findItem(R.id.saved_comments_menu_id).setVisible(true);
     	} else {
             menu.findItem(R.id.login_menu_id).setVisible(true);
             menu.findItem(R.id.inbox_menu_id).setVisible(false);
 	        menu.findItem(R.id.user_profile_menu_id).setVisible(false);
             menu.findItem(R.id.logout_menu_id).setVisible(false);
+            menu.findItem(R.id.saved_comments_menu_id).setVisible(false);
     	}
     	
     	// Edit and delete
@@ -1375,10 +1386,13 @@ public class CommentsListActivity extends ListActivity
             Intent prefsIntent = new Intent(getApplicationContext(), RedditPreferencesPage.class);
             startActivity(prefsIntent);
             break;
+    	case R.id.saved_comments_menu_id:
+            Intent toSC = new Intent(getApplicationContext(), SavedCommentsActivity.class);
+            startActivity(toSC);
+            break;
     	case android.R.id.home:
     		Common.goHome(this);
     		break;
-
     	default:
     		throw new IllegalArgumentException("Unexpected action value "+item.getItemId());
     	}
@@ -1838,8 +1852,10 @@ public class CommentsListActivity extends ListActivity
     		final TextView urlView = (TextView) dialog.findViewById(R.id.url);
     		final TextView submissionStuffView = (TextView) dialog.findViewById(R.id.submissionTime_submitter_subreddit);
     		final Button linkButton = (Button) dialog.findViewById(R.id.thread_link_button);
+    		final Button saveButton = (Button) dialog.findViewById(R.id.save_button);
 			
     		if (mVoteTargetThing == getOpThingInfo()) {
+                saveButton.setVisibility(View.INVISIBLE);
 				likes = mVoteTargetThing.getLikes();
     			titleView.setVisibility(View.VISIBLE);
     			titleView.setText(getOpThingInfo().getTitle());
@@ -1869,6 +1885,8 @@ public class CommentsListActivity extends ListActivity
 	    			linkButton.setEnabled(true);
     			}
     		} else {
+    		    saveButton.setVisibility(View.VISIBLE);
+    		    saveButton.setText(R.string.save_comment);
     			titleView.setText("Comment by " + mVoteTargetThing.getAuthor());
     			likes = mVoteTargetThing.getLikes();
     			urlView.setVisibility(View.INVISIBLE);
@@ -1889,6 +1907,20 @@ public class CommentsListActivity extends ListActivity
     			voteUpButton.setVisibility(View.VISIBLE);
     			voteDownButton.setVisibility(View.VISIBLE);
     			replyButton.setEnabled(true);
+    			
+    			if (saveButton.getVisibility() == View.VISIBLE)
+    			{
+    			    if (!sdb.containsComment(mSettings.getUsername(), mVoteTargetThing.getId()))
+    			    {
+    			        canSaveComment = true;
+    			        saveButton.setEnabled(true);
+    			    }
+    			    else
+    			    {
+    			        canSaveComment = false;
+    			        saveButton.setText(R.string.unsave_comment);
+    			    }
+    			}
     			
     			// Make sure the setChecked() actions don't actually vote just yet.
     			voteUpButton.setOnCheckedChangeListener(null);
@@ -1913,9 +1945,13 @@ public class CommentsListActivity extends ListActivity
 	    		voteDownButton.setOnCheckedChangeListener(voteDownOnCheckedChangeListener);
 
 	    		// The "reply" button
-    			replyButton.setOnClickListener(replyOnClickListener);	
+    			replyButton.setOnClickListener(replyOnClickListener);
+    			
+    			//The "save" button
+    			saveButton.setOnClickListener(saveOnClickListener);
 	    	} else {
 	    		replyButton.setEnabled(false);
+	    		saveButton.setEnabled(false);
     			
 	    		voteUpButton.setVisibility(View.GONE);
     			voteDownButton.setVisibility(View.GONE);
@@ -2104,6 +2140,7 @@ public class CommentsListActivity extends ListActivity
 	    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
 	    	removeDialog(Constants.DIALOG_COMMENT_CLICK);
 	    	String thingFullname = mVoteTargetThing.getName();
+	    	
 			if (isChecked)
 				new VoteTask(thingFullname, -1).execute();
 			else
@@ -2116,6 +2153,30 @@ public class CommentsListActivity extends ListActivity
 			removeDialog(Constants.DIALOG_COMMENT_CLICK);
 			showDialog(Constants.DIALOG_REPLY);
 		}
+	};
+	
+	private final OnClickListener saveOnClickListener = new OnClickListener() {
+	    public void onClick(View v) {
+	        
+	        String user = mSettings.getUsername();
+	        String author = mVoteTargetThing.getAuthor();
+	        String body = mVoteTargetThing.getBody_html();
+	        String linkId = mVoteTargetThing.getLink_id();
+	        String commentId = mVoteTargetThing.getId();
+	        
+	        if (canSaveComment)
+	        {
+	            sdb.addSavedContent(new SavedContent(user, author, body, linkId, commentId, mSubreddit));
+	            Toast.makeText(CommentsListActivity.this, "Comment saved", Toast.LENGTH_LONG).show();
+	        }
+	        else
+	        {
+	            sdb.deleteSavedContent(new SavedContent(user, author, body, linkId, commentId, mSubreddit));
+	            Toast.makeText(CommentsListActivity.this, "Comment unsaved", Toast.LENGTH_LONG).show();
+	        }
+
+	        removeDialog(Constants.DIALOG_COMMENT_CLICK);
+	    }
 	};
 	
 	private final OnClickListener loginOnClickListener = new OnClickListener() {

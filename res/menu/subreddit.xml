@@ -37,6 +37,7 @@
         <item android:id="@+id/logout_menu_id" android:title="@string/logout" />
 		<item android:id="@+id/preferences_menu_id" android:title="@string/menu_preferences" android:alphabeticShortcut="p"/>
 		<item android:id="@+id/search" android:title="@string/menu_search"/>
+		<item android:id="@id/saved_comments_menu_id" android:title="@string/saved_content"></item>
 
 	</group>
 

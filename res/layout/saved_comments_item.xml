@@ -38,48 +38,6 @@
     	android:layout_marginLeft="5dp"
     	android:layout_marginRight="4dp"
     	/>
-    <View android:id="@+id/left_indent2"
-    	android:layout_width="1dp"
-    	android:layout_height="fill_parent"
-    	android:layout_marginLeft="5dp"
-    	android:layout_marginRight="4dp"
-    	/>
-    <View android:id="@+id/left_indent3"
-    	android:layout_width="1dp"
-    	android:layout_height="fill_parent"
-    	android:layout_marginLeft="5dp"
-    	android:layout_marginRight="4dp"
-    	/>
-    <View android:id="@+id/left_indent4"
-    	android:layout_width="1dp"
-    	android:layout_height="fill_parent"
-    	android:layout_marginLeft="5dp"
-    	android:layout_marginRight="4dp"
-    	/>
-    <View android:id="@+id/left_indent5"
-    	android:layout_width="1dp"
-    	android:layout_height="fill_parent"
-    	android:layout_marginLeft="5dp"
-    	android:layout_marginRight="4dp"
-    	/>
-    <View android:id="@+id/left_indent6"
-    	android:layout_width="1dp"
-    	android:layout_height="fill_parent"
-    	android:layout_marginLeft="5dp"
-    	android:layout_marginRight="4dp"
-    	/>
-    <View android:id="@+id/left_indent7"
-    	android:layout_width="1dp"
-    	android:layout_height="fill_parent"
-    	android:layout_marginLeft="5dp"
-    	android:layout_marginRight="4dp"
-    	/>
-    <View android:id="@+id/left_indent8"
-    	android:layout_width="1dp"
-    	android:layout_height="fill_parent"
-    	android:layout_marginLeft="5dp"
-    	android:layout_marginRight="4dp"
-    	/>
 
 	<LinearLayout
 	    android:layout_width="0dp"
@@ -124,60 +82,38 @@
 		            />
 		    </FrameLayout>
 		    
-			<TextView android:id="@+id/submitter"
-		        android:layout_width="wrap_content"
-		        android:layout_height="wrap_content"
-		        android:layout_marginRight="5dip"
-		        
-		        android:singleLine="true"
-		        android:ellipsize="marquee"
-		        android:textAppearance="?android:attr/textAppearanceSmall"
-		        android:textColor="#888"
-		        android:textStyle="bold"
-		    />
-		    
-			<TextView android:id="@+id/votes"
-		        android:layout_width="wrap_content"
-		        android:layout_height="wrap_content"
-		        android:layout_marginRight="4dip"
-		        
-		      	android:singleLine="true"
-		        android:ellipsize="marquee"
-		        android:textAppearance="?android:attr/textAppearanceSmall"
-		        />
-			
-			<TextView android:id="@+id/submissionTime"
-		        android:layout_width="wrap_content"
-		        android:layout_height="wrap_content"
-		        
-		        android:singleLine="true"
-		        android:ellipsize="marquee"
-		        android:textAppearance="?android:attr/textAppearanceSmall"
-		    	/>
-
-            <TextView android:id="@+id/textFlair"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-
-                android:layout_marginLeft="5dip"
-                android:singleLine="true"
-                android:ellipsize="marquee"
-                android:textAppearance="?android:attr/textAppearanceSmall"
-                android:textColor="@color/gray_50"
-                android:visibility="gone"
-                />
+			<TextView
+			    android:id="@id/submitter"
+			    android:layout_width="wrap_content"
+			    android:layout_height="wrap_content"
+			    android:layout_marginRight="5dip"
+			    android:ellipsize="marquee"
+			    android:paddingTop="5dp"
+			    android:singleLine="true"
+			    android:textAppearance="?android:attr/textAppearanceSmall"
+			    android:textColor="#888"
+			    android:textStyle="bold" />
 
 		</LinearLayout>
     
 	    <!-- Bottom row -->
 
         <TextView
-            android:id="@+id/body"
+            android:id="@id/body"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginRight="5dip"
+            android:paddingBottom="5dp"
+            android:background="@drawable/selftext_border"
             android:textAppearance="?android:attr/textAppearanceMedium" />
 	    
     </LinearLayout>
+
+	<View
+	    android:id="@+id/left_indent2"
+	    android:layout_width="1dp"
+	    android:layout_height="fill_parent"
+	    android:layout_marginLeft="5dp"
+	    android:layout_marginRight="4dp" />
 	    
 </LinearLayout>

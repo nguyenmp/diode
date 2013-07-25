@@ -85,6 +85,7 @@
 	
 	<string name="comment_links_button">links</string>
 	<string name="comment_reply_button">reply</string>
+	<string name="comment_save_button">save</string>
 	<string name="reply_save_button">save</string>
 	<string name="reply_cancel_button">cancel</string>
 	
@@ -163,6 +164,12 @@
 	<string name="view_comments">View comments</string>
 	<string name="view_subreddit">View subreddit</string>
 	<string name="close_browser">Close browser</string>
+	<string name="saved_content">Saved Comments</string>
+	<string name="author">Author</string>
+	<string name="body">Body</string>
+	<string name="save_comment">save</string>
+	<string name="unsave_comment">unsave</string>
+	<string name="view_saved_comment">view</string>
 	
 	
 	<!-- === Preferences === -->

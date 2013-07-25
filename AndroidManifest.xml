@@ -108,5 +108,6 @@
 	    <meta-data android:name="com.google.android.backup.api_key" android:value="AEdPqrEAAAAIrd4RnBA8kUYJJVB22mBqXZPhyj0-SFigY4SqxA" />
 	    <activity android:name=".filters.FilterListActivity"></activity>
 	    <activity android:name=".filters.FilterEditActivity"></activity>
+	    <activity android:label="Saved Comments" android:name=".comments.SavedCommentsActivity"></activity>
 	</application>
 </manifest> 

@@ -111,4 +111,15 @@
    		android:singleLine="true"
    		android:text="@string/comment_reply_button"
    		/>
+
+	<Button
+	    android:id="@+id/save_button"
+	    android:layout_width="110dip"
+	    android:layout_height="wrap_content"
+	    android:layout_alignParentRight="true"
+	    android:layout_below="@id/submissionTime_submitter_subreddit"
+	    android:layout_marginTop="150dip"
+	    android:singleLine="true"
+	    android:text="@string/comment_save_button" />
+
 </RelativeLayout>
