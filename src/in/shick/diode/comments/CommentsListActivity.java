@@ -154,7 +154,7 @@ public class CommentsListActivity extends ListActivity
     private boolean mCanChord = false;
     
     private SavedDBHandler sdb = null;
-    private boolean canSaveComment = true;
+    private ThingInfo saveCommentThing = null;
     
     // override transition animation available Android 2.0 (SDK Level 5) and above
     private static Method mActivity_overridePendingTransition;
@@ -1438,6 +1438,18 @@ public class CommentsListActivity extends ListActivity
     			menu.add(0, Constants.DIALOG_EDIT, Menu.NONE, "Edit");
     			menu.add(0, Constants.DIALOG_DELETE, Menu.NONE, "Delete");
     		}
+    		if (mSettings.isLoggedIn())
+    		{
+    		    saveCommentThing = item;
+    		    if (sdb.containsComment(mSettings.getUsername(), saveCommentThing.getId()))
+    		    {
+    		        menu.add(0, Constants.DIALOG_UNSAVE_COMMENT, Menu.NONE, "Unsave");
+    		    }
+    		    else
+    		    {
+    		        menu.add(0, Constants.DIALOG_SAVE_COMMENT, Menu.NONE, "Save");
+    		    }
+    		}
     		menu.add(0, Constants.DIALOG_HIDE_COMMENT, Menu.NONE, "Hide comment");
 //    		if (mSettings.isLoggedIn())
 //    			menu.add(0, Constants.DIALOG_REPORT, Menu.NONE, "Report comment");
@@ -1491,7 +1503,29 @@ public class CommentsListActivity extends ListActivity
     	case Constants.DIALOG_SHOW_COMMENT:
     		showComment(rowId);
     		return true;
-    		
+    	
+    	case Constants.DIALOG_SAVE_COMMENT:
+    	    String user = mSettings.getUsername();
+            String author = saveCommentThing.getAuthor();
+            String body = saveCommentThing.getBody_html();
+            String linkId = saveCommentThing.getLink_id();
+            String commentId = saveCommentThing.getId();
+
+            sdb.addSavedContent(new SavedContent(user, author, body, linkId, commentId, mSubreddit));
+            Toast.makeText(CommentsListActivity.this, "Comment saved", Toast.LENGTH_LONG).show();
+    	    return true;
+    	    
+    	case Constants.DIALOG_UNSAVE_COMMENT:
+    	    user = mSettings.getUsername();
+            author = saveCommentThing.getAuthor();
+            body = saveCommentThing.getBody_html();
+            linkId = saveCommentThing.getLink_id();
+            commentId = saveCommentThing.getId();
+            
+            sdb.deleteSavedContent(new SavedContent(user, author, body, linkId, commentId, mSubreddit));
+            Toast.makeText(CommentsListActivity.this, "Comment unsaved", Toast.LENGTH_LONG).show();
+            return true;
+    	
     	case Constants.DIALOG_GOTO_PARENT:
 			int myIndent = mCommentsAdapter.getItem(rowId).getIndent();
     		int parentRowId;
@@ -1852,10 +1886,8 @@ public class CommentsListActivity extends ListActivity
     		final TextView urlView = (TextView) dialog.findViewById(R.id.url);
     		final TextView submissionStuffView = (TextView) dialog.findViewById(R.id.submissionTime_submitter_subreddit);
     		final Button linkButton = (Button) dialog.findViewById(R.id.thread_link_button);
-    		final Button saveButton = (Button) dialog.findViewById(R.id.save_button);
 			
     		if (mVoteTargetThing == getOpThingInfo()) {
-                saveButton.setVisibility(View.INVISIBLE);
 				likes = mVoteTargetThing.getLikes();
     			titleView.setVisibility(View.VISIBLE);
     			titleView.setText(getOpThingInfo().getTitle());
@@ -1885,8 +1917,6 @@ public class CommentsListActivity extends ListActivity
 	    			linkButton.setEnabled(true);
     			}
     		} else {
-    		    saveButton.setVisibility(View.VISIBLE);
-    		    saveButton.setText(R.string.save_comment);
     			titleView.setText("Comment by " + mVoteTargetThing.getAuthor());
     			likes = mVoteTargetThing.getLikes();
     			urlView.setVisibility(View.INVISIBLE);
@@ -1907,20 +1937,6 @@ public class CommentsListActivity extends ListActivity
     			voteUpButton.setVisibility(View.VISIBLE);
     			voteDownButton.setVisibility(View.VISIBLE);
     			replyButton.setEnabled(true);
-    			
-    			if (saveButton.getVisibility() == View.VISIBLE)
-    			{
-    			    if (!sdb.containsComment(mSettings.getUsername(), mVoteTargetThing.getId()))
-    			    {
-    			        canSaveComment = true;
-    			        saveButton.setEnabled(true);
-    			    }
-    			    else
-    			    {
-    			        canSaveComment = false;
-    			        saveButton.setText(R.string.unsave_comment);
-    			    }
-    			}
     			
     			// Make sure the setChecked() actions don't actually vote just yet.
     			voteUpButton.setOnCheckedChangeListener(null);
@@ -1946,12 +1962,8 @@ public class CommentsListActivity extends ListActivity
 
 	    		// The "reply" button
     			replyButton.setOnClickListener(replyOnClickListener);
-    			
-    			//The "save" button
-    			saveButton.setOnClickListener(saveOnClickListener);
 	    	} else {
 	    		replyButton.setEnabled(false);
-	    		saveButton.setEnabled(false);
     			
 	    		voteUpButton.setVisibility(View.GONE);
     			voteDownButton.setVisibility(View.GONE);
@@ -2153,30 +2165,6 @@ public class CommentsListActivity extends ListActivity
 			removeDialog(Constants.DIALOG_COMMENT_CLICK);
 			showDialog(Constants.DIALOG_REPLY);
 		}
-	};
-	
-	private final OnClickListener saveOnClickListener = new OnClickListener() {
-	    public void onClick(View v) {
-	        
-	        String user = mSettings.getUsername();
-	        String author = mVoteTargetThing.getAuthor();
-	        String body = mVoteTargetThing.getBody_html();
-	        String linkId = mVoteTargetThing.getLink_id();
-	        String commentId = mVoteTargetThing.getId();
-	        
-	        if (canSaveComment)
-	        {
-	            sdb.addSavedContent(new SavedContent(user, author, body, linkId, commentId, mSubreddit));
-	            Toast.makeText(CommentsListActivity.this, "Comment saved", Toast.LENGTH_LONG).show();
-	        }
-	        else
-	        {
-	            sdb.deleteSavedContent(new SavedContent(user, author, body, linkId, commentId, mSubreddit));
-	            Toast.makeText(CommentsListActivity.this, "Comment unsaved", Toast.LENGTH_LONG).show();
-	        }
-
-	        removeDialog(Constants.DIALOG_COMMENT_CLICK);
-	    }
 	};
 	
 	private final OnClickListener loginOnClickListener = new OnClickListener() {

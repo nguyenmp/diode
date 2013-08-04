@@ -114,6 +114,8 @@ public class Constants {
     public static final int DIALOG_THREAD_CLICK = 34;
     public static final int DIALOG_VIEW_PROFILE = 35;
     public static final int DIALOG_SAVED_COMMENTS = 36;
+    public static final int DIALOG_SAVE_COMMENT = 37;
+    public static final int DIALOG_UNSAVE_COMMENT = 38;
 
     // progress dialogs
     public static final int DIALOG_LOGGING_IN = 1000;
