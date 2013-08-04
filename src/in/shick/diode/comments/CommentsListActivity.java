@@ -1438,6 +1438,10 @@ public class CommentsListActivity extends ListActivity
     			menu.add(0, Constants.DIALOG_EDIT, Menu.NONE, "Edit");
     			menu.add(0, Constants.DIALOG_DELETE, Menu.NONE, "Delete");
     		}
+    		menu.add(0, Constants.DIALOG_HIDE_COMMENT, Menu.NONE, "Hide comment");
+//    		if (mSettings.isLoggedIn())
+//    			menu.add(0, Constants.DIALOG_REPORT, Menu.NONE, "Report comment");
+    		menu.add(0, Constants.DIALOG_GOTO_PARENT, Menu.NONE, "Go to parent");
     		if (mSettings.isLoggedIn())
     		{
     		    saveCommentThing = item;
@@ -1450,10 +1454,6 @@ public class CommentsListActivity extends ListActivity
     		        menu.add(0, Constants.DIALOG_SAVE_COMMENT, Menu.NONE, "Save");
     		    }
     		}
-    		menu.add(0, Constants.DIALOG_HIDE_COMMENT, Menu.NONE, "Hide comment");
-//    		if (mSettings.isLoggedIn())
-//    			menu.add(0, Constants.DIALOG_REPORT, Menu.NONE, "Report comment");
-    		menu.add(0, Constants.DIALOG_GOTO_PARENT, Menu.NONE, "Go to parent");
     		menu.add(0, Constants.DIALOG_VIEW_PROFILE, Menu.NONE,
     				String.format(getResources().getString(R.string.user_profile), item.getAuthor()));
     	}
