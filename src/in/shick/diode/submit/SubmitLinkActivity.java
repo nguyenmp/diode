@@ -23,6 +23,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -171,13 +172,35 @@ public class SubmitLinkActivity extends TabActivity {
         	// Share
 	        Bundle extras = getIntent().getExtras();
 	        if (extras != null) {
-	        	String url = extras.getString(Intent.EXTRA_TEXT);
+                        // find the most likely submission URL since some
+                        // programs share more than the URL
+                        // the most likely is considered to be the longest
+                        // string token with a URI scheme of http or https
+                        StringBuilder titleBuilder = new StringBuilder();
+                        String rawText = extras.getString(Intent.EXTRA_TEXT);
+                        StringTokenizer extraTextTokenizer = new StringTokenizer(rawText);
+                        Uri bestUri = Uri.parse("");
+                        while(extraTextTokenizer.hasMoreTokens()) {
+                            Uri uri = Uri.parse(extraTextTokenizer.nextToken());
+                            if(!"http".equalsIgnoreCase(uri.getScheme()) &&
+                                    !"https".equalsIgnoreCase(uri.getScheme())) {
+                                titleBuilder.append(uri.toString()).append(' ');
+                                continue;
+                            }
+                            if(uri.toString().length() > bestUri.toString().length()) {
+                                bestUri = uri;
+                            }
+                        }
+                        String url = bestUri.toString();
+                        String title = titleBuilder.toString();
 	        	final EditText submitLinkUrl = (EditText) findViewById(R.id.submit_link_url);
 	        	final EditText submitLinkReddit = (EditText) findViewById(R.id.submit_link_reddit);
+			final EditText submitLinkTitle = (EditText) findViewById(R.id.submit_link_title);
 	        	final EditText submitTextReddit = (EditText) findViewById(R.id.submit_text_reddit);
 	        	submitLinkUrl.setText(url);
 	        	submitLinkReddit.setText("");
         		submitTextReddit.setText("");
+                        submitLinkTitle.setText(title);
         		mSubmitUrl = Constants.REDDIT_BASE_URL + "/submit";
 	        }
         } else {
