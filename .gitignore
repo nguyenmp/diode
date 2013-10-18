@@ -7,3 +7,10 @@ proguard
 local.properties
 build.xml
 tags
+
+# Removed IntelliJ files #
+.idea/
+*.iml
+
+# Removed swap files #
+*~
